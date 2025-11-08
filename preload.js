@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCacheStats: () => ipcRenderer.invoke('get-cache-stats'),
   clearCache: () => ipcRenderer.invoke('clear-cache'),
   generateReport: (trips, reportConfig, outputDir) =>
-    ipcRenderer.invoke('generate-report', { trips, reportConfig, outputDir })
+    ipcRenderer.invoke('generate-report', { trips, reportConfig, outputDir }),
+  exportLogs: (outputDir) => ipcRenderer.invoke('export-logs', outputDir)
 });
