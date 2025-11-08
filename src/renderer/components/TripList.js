@@ -7,14 +7,18 @@ function TripList({ trips, selectedTrips, onTripSelect, settings }) {
 
   if (completedTrips.length === 0) {
     return (
-      <div className="no-trips">
+      <div className="no-trips" role="status" aria-live="polite">
         <p>No completed trips found for the selected date range.</p>
       </div>
     );
   }
 
   return (
-    <div className="trip-list">
+    <div
+      className="trip-list"
+      role="group"
+      aria-label={`${completedTrips.length} completed trip${completedTrips.length !== 1 ? 's' : ''}`}
+    >
       {completedTrips.map((tripData) => {
         const uuid = tripData.trip.jobUUID || tripData.activity.uuid;
         return (

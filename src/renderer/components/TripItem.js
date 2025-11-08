@@ -2,6 +2,7 @@ import React from 'react';
 
 function TripItem({ tripData, isSelected, onSelect, addressMappings = [] }) {
   const { activity, trip } = tripData;
+  const tripId = trip.jobUUID || activity.uuid;
 
   // Parse date from subtitle (format: "Nov 07 • 10:30 AM")
   const date = activity.subtitle ? activity.subtitle.split(' • ')[0] : 'N/A';
@@ -35,6 +36,9 @@ function TripItem({ tripData, isSelected, onSelect, addressMappings = [] }) {
   // Get fare
   const fare = trip.fare || 'N/A';
 
+  // Create comprehensive description for screen readers
+  const tripDescription = `${date}${time ? ` at ${time}` : ''}, from ${startLocation} to ${endLocation}, fare ${fare}${trip.vehicleDisplayName ? `, vehicle ${trip.vehicleDisplayName}` : ''}`;
+
   return (
     <div className={`trip-item ${isSelected ? 'selected' : ''}`} onClick={onSelect}>
       <div className="trip-checkbox">
@@ -43,29 +47,34 @@ function TripItem({ tripData, isSelected, onSelect, addressMappings = [] }) {
           checked={isSelected}
           onChange={onSelect}
           onClick={(e) => e.stopPropagation()}
+          aria-label={tripDescription}
         />
       </div>
 
       <div className="trip-details">
         <div className="trip-header">
-          <span className="trip-date">{date} {time && `at ${time}`}</span>
-          <span className="trip-fare">{fare}</span>
+          <span className="trip-date" aria-hidden="true">
+            {date} {time && `at ${time}`}
+          </span>
+          <span className="trip-fare" aria-hidden="true">
+            {fare}
+          </span>
         </div>
 
         <div className="trip-route">
           <div className="trip-location">
-            <span className="location-icon">📍</span>
-            <span className="location-text">{startLocation}</span>
+            <span className="location-icon" aria-hidden="true">📍</span>
+            <span className="location-text" aria-hidden="true">{startLocation}</span>
           </div>
-          <div className="route-arrow">→</div>
+          <div className="route-arrow" aria-hidden="true">→</div>
           <div className="trip-location">
-            <span className="location-icon">📍</span>
-            <span className="location-text">{endLocation}</span>
+            <span className="location-icon" aria-hidden="true">📍</span>
+            <span className="location-text" aria-hidden="true">{endLocation}</span>
           </div>
         </div>
 
         {trip.vehicleDisplayName && (
-          <div className="trip-vehicle">
+          <div className="trip-vehicle" aria-hidden="true">
             <span>Vehicle: {trip.vehicleDisplayName}</span>
           </div>
         )}

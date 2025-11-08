@@ -161,9 +161,14 @@ function DownloadTab({ settings }) {
   return (
     <div className="download-tab">
       {reportMessage && (
-        <div className="notification success">
+        <div
+          className="notification success"
+          role="alert"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <div className="notification-content">
-            <span className="notification-icon">✓</span>
+            <span className="notification-icon" aria-hidden="true">✓</span>
             <div className="notification-text">{reportMessage}</div>
             <button
               className="notification-close"
@@ -176,12 +181,12 @@ function DownloadTab({ settings }) {
         </div>
       )}
 
-      <h2>Download Receipts</h2>
-      <p className="tab-description">
+      <h2 id="download-heading">Download Receipts</h2>
+      <p className="tab-description" id="download-description">
         Select a date range to fetch your Uber trips, then download and merge receipts.
       </p>
 
-      <div className="controls">
+      <div className="controls" role="search" aria-labelledby="download-heading">
         <DatePicker
           label="Start Date"
           value={startDate}
@@ -198,29 +203,39 @@ function DownloadTab({ settings }) {
           className="btn btn-primary"
           onClick={handleSearch}
           disabled={loading || !startDate || !endDate}
+          aria-label={loading ? 'Searching for trips, please wait' : 'Search for trips in selected date range'}
+          aria-busy={loading}
         >
           {loading ? 'Searching...' : 'Search Trips'}
         </button>
       </div>
 
       {error && (
-        <div className="error-message">
+        <div className="error-message" role="alert" aria-live="assertive">
           {error}
         </div>
       )}
 
       {trips.length > 0 && (
         <>
-          <div className="trip-toolbar">
+          <div className="trip-toolbar" role="tablist" aria-label="Trip views">
             <button
               className={`toolbar-btn ${activeView === 'trips' ? 'active' : ''}`}
               onClick={() => setActiveView('trips')}
+              role="tab"
+              aria-selected={activeView === 'trips'}
+              aria-controls="trips-panel"
+              id="trips-tab"
             >
               Trips
             </button>
             <button
               className={`toolbar-btn ${activeView === 'metrics' ? 'active' : ''}`}
               onClick={() => setActiveView('metrics')}
+              role="tab"
+              aria-selected={activeView === 'metrics'}
+              aria-controls="metrics-panel"
+              id="metrics-tab"
             >
               Metrics
             </button>
@@ -228,15 +243,23 @@ function DownloadTab({ settings }) {
 
           {activeView === 'trips' && (
             <>
-              <div className="trip-controls">
+              <div
+                className="trip-controls"
+                role="toolbar"
+                aria-label="Trip actions"
+                id="trips-panel"
+                role="tabpanel"
+                aria-labelledby="trips-tab"
+              >
                 <button
                   className="btn btn-secondary"
                   onClick={handleSelectAll}
+                  aria-label={selectedTrips.size === completedTrips.length ? `Deselect all ${completedTrips.length} trips` : `Select all ${completedTrips.length} trips`}
                 >
                   {selectedTrips.size === completedTrips.length ? 'Deselect All' : 'Select All'}
                 </button>
 
-                <span className="trip-count">
+                <span className="trip-count" role="status" aria-live="polite" aria-atomic="true">
                   {selectedTrips.size} of {completedTrips.length} trips selected
                 </span>
 
@@ -244,6 +267,8 @@ function DownloadTab({ settings }) {
                   className="btn btn-success"
                   onClick={handleDownload}
                   disabled={selectedTrips.size === 0 || downloading}
+                  aria-label={downloading ? `Downloading ${selectedTrips.size} receipts, please wait` : `Download and merge ${selectedTrips.size} selected receipt${selectedTrips.size !== 1 ? 's' : ''}`}
+                  aria-busy={downloading}
                 >
                   {downloading ? 'Downloading...' : 'Download & Merge'}
                 </button>
@@ -252,8 +277,10 @@ function DownloadTab({ settings }) {
                   className="btn btn-primary"
                   onClick={handleGenerateReport}
                   disabled={selectedTrips.size === 0 || generatingReport}
+                  aria-label={generatingReport ? `Generating report for ${selectedTrips.size} trips, please wait` : `Generate travel report for ${selectedTrips.size} selected trip${selectedTrips.size !== 1 ? 's' : ''}`}
+                  aria-busy={generatingReport}
                 >
-                  {generatingReport ? 'Generating...' : '📄 Generate Report'}
+                  <span aria-hidden="true">📄</span> {generatingReport ? 'Generating...' : 'Generate Report'}
                 </button>
               </div>
 
@@ -267,24 +294,26 @@ function DownloadTab({ settings }) {
           )}
 
           {activeView === 'metrics' && (
-            <TripStatistics trips={trips} />
+            <div id="metrics-panel" role="tabpanel" aria-labelledby="metrics-tab">
+              <TripStatistics trips={trips} />
+            </div>
           )}
         </>
       )}
 
       {loading && (
-        <div className="loading">
-          <div className="spinner"></div>
+        <div className="loading" role="status" aria-live="polite" aria-label="Loading trips">
+          <div className="spinner" aria-hidden="true"></div>
           <p>Loading trips...</p>
         </div>
       )}
 
       {downloading && (
-        <div className="loading-overlay">
+        <div className="loading-overlay" role="dialog" aria-modal="true" aria-labelledby="download-status">
           <div className="loading-modal">
-            <div className="spinner"></div>
-            <p>Downloading and merging receipts...</p>
-            <div className="loading-details">
+            <div className="spinner" aria-hidden="true"></div>
+            <p id="download-status">Downloading and merging receipts...</p>
+            <div className="loading-details" role="status" aria-live="polite">
               Processing {selectedTrips.size} receipt{selectedTrips.size !== 1 ? 's' : ''}
             </div>
           </div>
@@ -292,11 +321,11 @@ function DownloadTab({ settings }) {
       )}
 
       {generatingReport && (
-        <div className="loading-overlay">
+        <div className="loading-overlay" role="dialog" aria-modal="true" aria-labelledby="report-status">
           <div className="loading-modal">
-            <div className="spinner"></div>
-            <p>Generating travel report...</p>
-            <div className="loading-details">
+            <div className="spinner" aria-hidden="true"></div>
+            <p id="report-status">Generating travel report...</p>
+            <div className="loading-details" role="status" aria-live="polite">
               Processing {selectedTrips.size} trip{selectedTrips.size !== 1 ? 's' : ''}
             </div>
           </div>

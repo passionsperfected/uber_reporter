@@ -31,30 +31,32 @@ function BrowserSettings({ settings, setSettings }) {
 
   return (
     <div className="browser-settings">
-      <h2>Browser & Authentication</h2>
+      <h2 id="browser-settings-heading">Browser & Authentication</h2>
       <p className="settings-description">
         Select the browser where you're logged into Uber. The app will use your browser's cookies to authenticate.
       </p>
 
       <div className="settings-section">
-        <label className="settings-label">Browser</label>
+        <label htmlFor="browser-select" className="settings-label">Browser</label>
         <select
+          id="browser-select"
           className="settings-select"
           value={settings.browserType}
           onChange={(e) => handleBrowserChange(e.target.value)}
+          aria-describedby="browser-hint"
         >
           <option value="firefox">Firefox</option>
           <option value="chrome">Chrome</option>
           <option value="safari">Safari (Limited Support)</option>
         </select>
-        <p className="settings-hint">
+        <p id="browser-hint" className="settings-hint">
           Make sure you're logged into Uber in your selected browser before testing the connection.
         </p>
       </div>
 
       <div className="settings-section">
         <label className="settings-label">Test Connection</label>
-        <p className="settings-hint">
+        <p className="settings-hint" id="test-connection-hint">
           Click the button below to verify that your authentication is working correctly.
         </p>
 
@@ -62,14 +64,24 @@ function BrowserSettings({ settings, setSettings }) {
           className="btn btn-primary"
           onClick={handleTestConnection}
           disabled={connectionStatus === 'testing'}
+          aria-label={connectionStatus === 'testing' ? 'Testing connection, please wait' : 'Test Uber connection'}
+          aria-busy={connectionStatus === 'testing'}
+          aria-describedby="test-connection-hint"
         >
           {connectionStatus === 'testing' ? 'Testing...' : 'Test Connection'}
         </button>
 
         {connectionStatus && (
-          <div className={`connection-status ${connectionStatus}`}>
-            {connectionStatus === 'success' && '✅ '}
-            {connectionStatus === 'failed' && '❌ '}
+          <div
+            className={`connection-status ${connectionStatus}`}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span aria-hidden="true">
+              {connectionStatus === 'success' && '✅ '}
+              {connectionStatus === 'failed' && '❌ '}
+            </span>
             {connectionMessage}
           </div>
         )}

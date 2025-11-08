@@ -55,56 +55,56 @@ function TripStatistics({ trips }) {
     : 0;
 
   return (
-    <div className="trip-statistics">
+    <div className="trip-statistics" role="region" aria-label="Trip statistics and metrics">
       <div className="statistics-section">
-        <h3>Trip Summary</h3>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-value">${totalCost.toFixed(2)}</div>
-            <div className="stat-label">Total Spent</div>
+        <h3 id="trip-summary-heading">Trip Summary</h3>
+        <div className="stats-grid" role="group" aria-labelledby="trip-summary-heading">
+          <div className="stat-card" role="img" aria-label={`Total spent: $${totalCost.toFixed(2)}`}>
+            <div className="stat-value" aria-hidden="true">${totalCost.toFixed(2)}</div>
+            <div className="stat-label" aria-hidden="true">Total Spent</div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-value">${avgCost.toFixed(2)}</div>
-            <div className="stat-label">Avg per Trip</div>
+          <div className="stat-card" role="img" aria-label={`Average per trip: $${avgCost.toFixed(2)}`}>
+            <div className="stat-value" aria-hidden="true">${avgCost.toFixed(2)}</div>
+            <div className="stat-label" aria-hidden="true">Avg per Trip</div>
           </div>
 
           {totalDistance > 0 && (
-            <div className="stat-card">
-              <div className="stat-value">{totalDistance.toFixed(1)} mi</div>
-              <div className="stat-label">Total Distance</div>
+            <div className="stat-card" role="img" aria-label={`Total distance: ${totalDistance.toFixed(1)} miles`}>
+              <div className="stat-value" aria-hidden="true">{totalDistance.toFixed(1)} mi</div>
+              <div className="stat-label" aria-hidden="true">Total Distance</div>
             </div>
           )}
 
           {totalDuration > 0 && (
-            <div className="stat-card">
-              <div className="stat-value">
+            <div className="stat-card" role="img" aria-label={`Total ride time: ${totalHours > 0 ? `${totalHours} hours and ${totalMinutes} minutes` : `${totalMinutes} minutes`}`}>
+              <div className="stat-value" aria-hidden="true">
                 {totalHours > 0 ? `${totalHours}h ${totalMinutes}m` : `${totalMinutes}m`}
               </div>
-              <div className="stat-label">Total Ride Time</div>
+              <div className="stat-label" aria-hidden="true">Total Ride Time</div>
             </div>
           )}
         </div>
       </div>
 
       <div className="statistics-section">
-        <h3>Report Details</h3>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-value">{totalTrips}</div>
-            <div className="stat-label">Total Trips</div>
+        <h3 id="report-details-heading">Report Details</h3>
+        <div className="stats-grid" role="group" aria-labelledby="report-details-heading">
+          <div className="stat-card" role="img" aria-label={`Total trips: ${totalTrips}`}>
+            <div className="stat-value" aria-hidden="true">{totalTrips}</div>
+            <div className="stat-label" aria-hidden="true">Total Trips</div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-value">{surgeTrips}</div>
-            <div className="stat-label">Surge Trips</div>
-            <div className="stat-detail">{((surgeTrips / totalTrips) * 100).toFixed(0)}%</div>
+          <div className="stat-card" role="img" aria-label={`Surge trips: ${surgeTrips}, which is ${((surgeTrips / totalTrips) * 100).toFixed(0)} percent`}>
+            <div className="stat-value" aria-hidden="true">{surgeTrips}</div>
+            <div className="stat-label" aria-hidden="true">Surge Trips</div>
+            <div className="stat-detail" aria-hidden="true">{((surgeTrips / totalTrips) * 100).toFixed(0)}%</div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-value">{scheduledTrips}</div>
-            <div className="stat-label">Scheduled Trips</div>
-            <div className="stat-detail">{((scheduledTrips / totalTrips) * 100).toFixed(0)}%</div>
+          <div className="stat-card" role="img" aria-label={`Scheduled trips: ${scheduledTrips}, which is ${((scheduledTrips / totalTrips) * 100).toFixed(0)} percent`}>
+            <div className="stat-value" aria-hidden="true">{scheduledTrips}</div>
+            <div className="stat-label" aria-hidden="true">Scheduled Trips</div>
+            <div className="stat-detail" aria-hidden="true">{((scheduledTrips / totalTrips) * 100).toFixed(0)}%</div>
           </div>
         </div>
       </div>

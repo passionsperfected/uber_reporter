@@ -74,11 +74,16 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className="app" role="application" aria-label="Uber Reporter Application">
       {logMessage && (
-        <div className="notification success">
+        <div
+          className="notification success"
+          role="alert"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <div className="notification-content">
-            <span className="notification-icon">✓</span>
+            <span className="notification-icon" aria-hidden="true">✓</span>
             <div className="notification-text">{logMessage}</div>
             <button
               className="notification-close"
@@ -92,24 +97,38 @@ function App() {
       )}
 
       {showBugReport && (
-        <div className="modal-overlay" onClick={() => setShowBugReport(false)}>
+        <div
+          className="modal-overlay"
+          onClick={() => setShowBugReport(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bug-report-title"
+          aria-describedby="bug-report-description"
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Report a Bug</h2>
-            <p className="modal-description">
+            <h2 id="bug-report-title">Report a Bug</h2>
+            <p id="bug-report-description" className="modal-description">
               Please describe the issue you encountered. This will be included with your log files.
             </p>
+            <label htmlFor="bug-description" className="visually-hidden">
+              Bug description
+            </label>
             <textarea
+              id="bug-description"
               className="bug-description-input"
               value={bugDescription}
               onChange={(e) => setBugDescription(e.target.value)}
               placeholder="Describe what went wrong..."
               rows="6"
+              aria-label="Describe the bug or issue you encountered"
+              autoFocus
             />
-            <div className="modal-actions">
+            <div className="modal-actions" role="group" aria-label="Bug report actions">
               <button
                 className="btn btn-secondary"
                 onClick={() => setShowBugReport(false)}
                 disabled={exportingLogs}
+                aria-label="Cancel bug report"
               >
                 Cancel
               </button>
@@ -117,6 +136,8 @@ function App() {
                 className="btn btn-primary"
                 onClick={handleExportLogs}
                 disabled={exportingLogs}
+                aria-label={exportingLogs ? 'Exporting logs, please wait' : 'Submit bug report and export logs'}
+                aria-busy={exportingLogs}
               >
                 {exportingLogs ? 'Exporting...' : 'Report Error'}
               </button>
@@ -125,37 +146,42 @@ function App() {
         </div>
       )}
 
-      <div className="title-bar">
+      <header className="title-bar" role="banner">
         <h1>Uber Reporter</h1>
         <button
           className="bug-report-btn"
           onClick={handleBugButtonClick}
           disabled={exportingLogs}
+          aria-label="Oh my god! a cockroach! Report a bug or technical issue"
           title="Report a bug"
         >
-          🐛
+          <span aria-hidden="true">🪳</span>
         </button>
-      </div>
+      </header>
 
-      <div className="main-nav">
+      <nav className="main-nav" role="navigation" aria-label="Main navigation">
         <button
           className={`nav-btn ${activeView === 'download' ? 'active' : ''}`}
           onClick={() => setActiveView('download')}
+          aria-label="Download trips and receipts"
+          aria-current={activeView === 'download' ? 'page' : undefined}
         >
-          📥 Download
+          <span aria-hidden="true">📥</span> Download
         </button>
         <button
           className={`nav-btn ${activeView === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveView('settings')}
+          aria-label="Yucky Application settings"
+          aria-current={activeView === 'settings' ? 'page' : undefined}
         >
-          ⚙️ Settings
+          <span aria-hidden="true">⚙️</span> Settings
         </button>
-      </div>
+      </nav>
 
-      <div className="tab-content">
+      <main className="tab-content" role="main" aria-label={activeView === 'download' ? 'Download and receipts section' : 'Settings section'}>
         {activeView === 'download' && <DownloadTab settings={settings} />}
         {activeView === 'settings' && <SettingsTab settings={settings} setSettings={setSettings} />}
-      </div>
+      </main>
     </div>
   );
 }

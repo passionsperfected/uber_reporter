@@ -4,6 +4,19 @@
   padding: 0;
 }
 
+/* Screen reader only content */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -202,7 +215,12 @@ body {
   letter-spacing: 0.8px;
 }
 
-.date-picker input {
+.date-picker-wrapper {
+  position: relative;
+}
+
+.date-picker-button {
+  width: 100%;
   padding: 12px 16px;
   border: 2px solid #e0e0e0;
   border-radius: 10px;
@@ -211,18 +229,41 @@ body {
   background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
 }
 
-.date-picker input:hover {
+.date-picker-button:hover {
   border-color: #333333;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
 }
 
-.date-picker input:focus {
+.date-picker-button:focus {
   border-color: #000000;
   outline: none;
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.date-picker-display {
+  flex: 1;
+  color: #1d1d1f;
+}
+
+.calendar-icon {
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+.date-picker-hidden-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
 }
 
 .btn {
@@ -431,6 +472,11 @@ body {
 
 .trip-checkbox input[type="checkbox"]:hover {
   transform: scale(1.1);
+}
+
+.trip-checkbox input[type="checkbox"]:focus {
+  outline: 3px solid #000000;
+  outline-offset: 2px;
 }
 
 .trip-details {
