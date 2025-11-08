@@ -34,6 +34,13 @@ function App() {
   });
   const [exportingLogs, setExportingLogs] = useState(false);
   const [logMessage, setLogMessage] = useState(null);
+  const [showBugReport, setShowBugReport] = useState(false);
+  const [bugDescription, setBugDescription] = useState('');
+
+  const handleBugButtonClick = () => {
+    setShowBugReport(true);
+    setBugDescription('');
+  };
 
   const handleExportLogs = async () => {
     setExportingLogs(true);
@@ -47,11 +54,13 @@ function App() {
         return;
       }
 
-      const result = await window.electronAPI.exportLogs(dirResult.path);
+      const result = await window.electronAPI.exportLogs(dirResult.path, bugDescription);
 
       if (result.success) {
-        setLogMessage(`Logs exported successfully!\n\nSaved to: ${result.zipPath}`);
+        setLogMessage(`Bug report exported successfully!\n\nSaved to: ${result.zipPath}`);
         setTimeout(() => setLogMessage(null), 5000);
+        setShowBugReport(false);
+        setBugDescription('');
       } else {
         setLogMessage(`Failed to export logs: ${result.error}`);
         setTimeout(() => setLogMessage(null), 5000);
@@ -82,15 +91,49 @@ function App() {
         </div>
       )}
 
+      {showBugReport && (
+        <div className="modal-overlay" onClick={() => setShowBugReport(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Report a Bug</h2>
+            <p className="modal-description">
+              Please describe the issue you encountered. This will be included with your log files.
+            </p>
+            <textarea
+              className="bug-description-input"
+              value={bugDescription}
+              onChange={(e) => setBugDescription(e.target.value)}
+              placeholder="Describe what went wrong..."
+              rows="6"
+            />
+            <div className="modal-actions">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowBugReport(false)}
+                disabled={exportingLogs}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleExportLogs}
+                disabled={exportingLogs}
+              >
+                {exportingLogs ? 'Exporting...' : 'Report Error'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="title-bar">
         <h1>Uber Utilities</h1>
         <button
           className="bug-report-btn"
-          onClick={handleExportLogs}
+          onClick={handleBugButtonClick}
           disabled={exportingLogs}
-          title="Export logs for bug report"
+          title="Report a bug"
         >
-          {exportingLogs ? '⏳' : '🐛'}
+          🐛
         </button>
       </div>
 

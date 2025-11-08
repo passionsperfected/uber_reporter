@@ -1329,3 +1329,86 @@ body {
     opacity: 1;
   }
 }
+
+/* Bug Report Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+  padding: 36px 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 520px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.modal-description {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.bug-description-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  resize: vertical;
+  min-height: 120px;
+  margin-bottom: 24px;
+}
+
+.bug-description-input:hover {
+  border-color: #333333;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.bug-description-input:focus {
+  border-color: #000000;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.bug-description-input::placeholder {
+  color: #999999;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modal-actions .btn {
+  min-width: 120px;
+}

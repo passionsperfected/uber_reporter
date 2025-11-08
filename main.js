@@ -11,7 +11,78 @@ const { generateTravelReport } = require('./src/services/reportService');
 
 let mainWindow;
 
+// Log capture system
+const logBuffer = [];
+const MAX_LOG_ENTRIES = 1000; // Limit log buffer size
+
+// Helper to format log entry
+function formatLogEntry(level, args) {
+  const timestamp = new Date().toISOString();
+  const message = args.map(arg => {
+    if (typeof arg === 'object') {
+      try {
+        return JSON.stringify(arg, null, 2);
+      } catch (e) {
+        return String(arg);
+      }
+    }
+    return String(arg);
+  }).join(' ');
+  return `[${timestamp}] [${level}] ${message}`;
+}
+
+// Capture console methods
+const originalConsole = {
+  log: console.log,
+  error: console.error,
+  warn: console.warn,
+  info: console.info
+};
+
+console.log = function(...args) {
+  logBuffer.push(formatLogEntry('INFO', args));
+  if (logBuffer.length > MAX_LOG_ENTRIES) logBuffer.shift();
+  originalConsole.log.apply(console, args);
+};
+
+console.error = function(...args) {
+  logBuffer.push(formatLogEntry('ERROR', args));
+  if (logBuffer.length > MAX_LOG_ENTRIES) logBuffer.shift();
+  originalConsole.error.apply(console, args);
+};
+
+console.warn = function(...args) {
+  logBuffer.push(formatLogEntry('WARN', args));
+  if (logBuffer.length > MAX_LOG_ENTRIES) logBuffer.shift();
+  originalConsole.warn.apply(console, args);
+};
+
+console.info = function(...args) {
+  logBuffer.push(formatLogEntry('INFO', args));
+  if (logBuffer.length > MAX_LOG_ENTRIES) logBuffer.shift();
+  originalConsole.info.apply(console, args);
+};
+
+// Capture uncaught exceptions
+process.on('uncaughtException', (error) => {
+  const errorLog = formatLogEntry('UNCAUGHT_EXCEPTION', [error.stack || error.message]);
+  logBuffer.push(errorLog);
+  originalConsole.error('Uncaught Exception:', error);
+});
+
+// Capture unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  const errorLog = formatLogEntry('UNHANDLED_REJECTION', [reason]);
+  logBuffer.push(errorLog);
+  originalConsole.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Log startup
+console.log('Uber Reporter starting...');
+
 function createWindow() {
+  console.log('Creating main window...');
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -26,21 +97,38 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
+  // Capture renderer process console logs
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    const levelMap = ['INFO', 'WARN', 'ERROR'];
+    const logLevel = levelMap[level] || 'INFO';
+    logBuffer.push(formatLogEntry(`RENDERER_${logLevel}`, [message, `(${sourceId}:${line})`]));
+    if (logBuffer.length > MAX_LOG_ENTRIES) logBuffer.shift();
+  });
+
   // Open DevTools in development
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
+    console.log('DevTools opened (development mode)');
   }
+
+  console.log('Main window created successfully');
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  console.log('Electron app ready');
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
+  console.log('All windows closed');
   if (process.platform !== 'darwin') {
+    console.log('Quitting application');
     app.quit();
   }
 });
 
 app.on('activate', () => {
+  console.log('App activated');
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
@@ -67,6 +155,7 @@ ipcMain.handle('test-connection', async (event, browserType) => {
 });
 
 ipcMain.handle('fetch-trips', async (event, { startDate, endDate, browserType }) => {
+  console.log(`Fetching trips from ${startDate} to ${endDate} using ${browserType}`);
   try {
     // Load browser cookies
     const cookies = await loadBrowserCookies(browserType);
@@ -76,10 +165,14 @@ ipcMain.handle('fetch-trips', async (event, { startDate, endDate, browserType })
     let activities = await getCachedActivities(cacheKey);
 
     if (!activities || activities.length === 0) {
+      console.log('Cache miss, fetching from API');
       // Fetch from API
       activities = await fetchActivitiesByDate(startDate, endDate, cookies);
       // Cache the results
       await cacheActivities(cacheKey, activities);
+      console.log(`Fetched ${activities.length} activities from API`);
+    } else {
+      console.log(`Cache hit, found ${activities.length} activities`);
     }
 
     // Fetch details for each activity
@@ -98,6 +191,7 @@ ipcMain.handle('fetch-trips', async (event, { startDate, endDate, browserType })
       });
     }
 
+    console.log(`Successfully fetched ${tripsWithDetails.length} trips with details`);
     return { success: true, trips: tripsWithDetails };
   } catch (error) {
     console.error('Error fetching trips:', error);
@@ -106,6 +200,7 @@ ipcMain.handle('fetch-trips', async (event, { startDate, endDate, browserType })
 });
 
 ipcMain.handle('download-receipts', async (event, { tripUUIDs, browserType, outputDir }) => {
+  console.log(`Downloading ${tripUUIDs.length} receipts to ${outputDir}`);
   try {
     const cookies = await loadBrowserCookies(browserType);
     const pdfPaths = [];
@@ -116,9 +211,11 @@ ipcMain.handle('download-receipts', async (event, { tripUUIDs, browserType, outp
       pdfPaths.push(pdfPath);
     }
 
+    console.log(`Downloaded ${pdfPaths.length} PDFs, merging...`);
     // Merge PDFs
     const mergedPath = await mergePDFs(pdfPaths, outputDir);
 
+    console.log(`Successfully merged PDFs to ${mergedPath}`);
     return { success: true, mergedPath, individualPaths: pdfPaths };
   } catch (error) {
     console.error('Error downloading receipts:', error);
@@ -160,10 +257,12 @@ ipcMain.handle('clear-cache', async () => {
 });
 
 ipcMain.handle('generate-report', async (event, { trips, reportConfig, outputDir }) => {
+  console.log(`Generating report for ${trips.length} trips to ${outputDir}`);
   try {
     const fileName = `Travel_Report_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)}.pdf`;
     const outputPath = require('path').join(outputDir, fileName);
     const reportPath = await generateTravelReport(trips, reportConfig, outputPath);
+    console.log(`Report generated successfully: ${reportPath}`);
     return { success: true, reportPath };
   } catch (error) {
     console.error('Error generating report:', error);
@@ -171,11 +270,14 @@ ipcMain.handle('generate-report', async (event, { trips, reportConfig, outputDir
   }
 });
 
-ipcMain.handle('export-logs', async (event, outputDir) => {
+ipcMain.handle('export-logs', async (event, outputDir, bugDescription) => {
+  console.log(`Exporting logs to ${outputDir}`);
+  console.log(`Current log buffer contains ${logBuffer.length} entries`);
   try {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
     const zipFileName = `uber-reporter-logs-${timestamp}.zip`;
     const zipPath = path.join(outputDir, zipFileName);
+    console.log(`Creating log archive: ${zipPath}`);
 
     // Create a write stream for the zip file
     const output = fsSync.createWriteStream(zipPath);
@@ -186,6 +288,7 @@ ipcMain.handle('export-logs', async (event, outputDir) => {
     // Return a promise that resolves when zipping is complete
     return new Promise((resolve, reject) => {
       output.on('close', () => {
+        console.log(`Log export complete: ${zipPath} (${archive.pointer()} bytes)`);
         resolve({ success: true, zipPath, size: archive.pointer() });
       });
 
@@ -225,8 +328,38 @@ ipcMain.handle('export-logs', async (event, outputDir) => {
       }
 
       // Add console logs captured during this session
-      const consoleLog = `Application logs would be captured here.\n\nThis is a placeholder for runtime logs.`;
+      const consoleLog = logBuffer.length > 0
+        ? logBuffer.join('\n')
+        : 'No logs captured during this session.';
       archive.append(consoleLog, { name: 'console-output.txt' });
+
+      // Add bug description if provided
+      if (bugDescription && bugDescription.trim()) {
+        archive.append(bugDescription.trim(), { name: 'bug-description.txt' });
+      }
+
+      // Add a summary
+      const summaryFiles = [
+        '- system-info.json: System and application information',
+        '- logs/: Electron framework logs (if available)',
+        '- console-output.txt: Application console logs from this session'
+      ];
+
+      if (bugDescription && bugDescription.trim()) {
+        summaryFiles.push('- bug-description.txt: User-provided description of the issue');
+      }
+
+      const summary = `Uber Reporter Log Export
+Generated: ${new Date().toISOString()}
+Total Log Entries: ${logBuffer.length}
+Platform: ${process.platform}
+Electron Version: ${process.versions.electron}
+Node Version: ${process.versions.node}
+
+This archive contains:
+${summaryFiles.join('\n')}
+`;
+      archive.append(summary, { name: 'README.txt' });
 
       // Finalize the archive
       archive.finalize();
