@@ -126,7 +126,7 @@ function App() {
       )}
 
       <div className="title-bar">
-        <h1>Uber Utilities</h1>
+        <h1>Uber Reporter</h1>
         <button
           className="bug-report-btn"
           onClick={handleBugButtonClick}

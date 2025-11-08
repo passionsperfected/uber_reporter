@@ -1,7 +1,7 @@
 {
-  "name": "uber-utilities",
+  "name": "uber-reporter",
   "version": "1.0.0",
-  "description": "Uber Utilities - Download and merge Uber receipts",
+  "description": "Uber Reporter - Download and merge Uber receipts",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "build": {
     "appId": "com.uberreporter.app",
-    "productName": "Uber Utilities",
+    "productName": "Uber Reporter",
     "files": [
       "main.js",
       "preload.js",
@@ -43,7 +43,7 @@
       "category": "public.app-category.productivity"
     },
     "dmg": {
-      "title": "Uber Utilities",
+      "title": "Uber Reporter",
       "icon": "build/icon.png"
     },
     "win": {

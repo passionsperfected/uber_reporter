@@ -91,7 +91,7 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    title: 'Uber Utilities',
+    title: 'Uber Reporter',
     titleBarStyle: 'default'
   });
 
