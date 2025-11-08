@@ -1,0 +1,46 @@
+🎉 Your Uber Utilities Electron App is Ready!
+
+QUICK START:
+============
+
+1. Make sure you're using Node 20:
+   nvm use 20
+
+2. Start the app:
+   npm start
+
+3. Use the app:
+   - Select your browser (Firefox recommended)
+   - Make sure you're logged into Uber in that browser
+   - Pick your date range
+   - Click "Search Trips"
+   - Select the trips you want
+   - Click "Download & Merge"
+   - Choose where to save
+   - Done!
+
+IMPORTANT NOTES:
+================
+- Always use Node 20 for this project (not Node 23)
+- The .nvmrc file will auto-select Node 20 when you cd into this directory
+- You must be logged into Uber in your selected browser
+- Firefox is the most reliable browser for cookie extraction
+
+DEVELOPMENT:
+============
+For development with auto-reload:
+   npm run dev
+
+To rebuild the React frontend:
+   npm run build
+
+PROJECT LOCATION:
+=================
+/Users/jdaigle/core/career/passions_perfected/projects/repositories/uber_utilities_claude/electron-app
+
+DOCUMENTATION:
+==============
+See README.md for full documentation
+See QUICKSTART.md for a quick guide
+
+Happy receipt downloading! 📄
