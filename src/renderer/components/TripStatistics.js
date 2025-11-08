@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-function TripStatistics({ trips, settings }) {
-  const [generating, setGenerating] = useState(false);
-  const [message, setMessage] = useState(null);
+function TripStatistics({ trips }) {
   // Filter completed trips
   const completedTrips = trips.filter(t => t.trip && t.trip.status === 'COMPLETED');
 
@@ -55,42 +53,6 @@ function TripStatistics({ trips, settings }) {
   const daySpan = earliestDate && latestDate
     ? Math.ceil((latestDate - earliestDate) / (1000 * 60 * 60 * 24)) + 1
     : 0;
-
-  const handleGenerateReport = async () => {
-    // Check if report config is set
-    if (!settings.reportConfig?.name || !settings.reportConfig?.vendorNumber) {
-      setMessage({ type: 'error', text: 'Please configure your report settings first (Settings → Report)' });
-      return;
-    }
-
-    setGenerating(true);
-    setMessage(null);
-
-    try {
-      const dirResult = await window.electronAPI.selectDirectory();
-
-      if (!dirResult.success) {
-        setGenerating(false);
-        return;
-      }
-
-      const result = await window.electronAPI.generateReport(
-        trips,
-        settings.reportConfig,
-        dirResult.path
-      );
-
-      if (result.success) {
-        setMessage({ type: 'success', text: `Report generated successfully!\n\nSaved to: ${result.reportPath}` });
-      } else {
-        setMessage({ type: 'error', text: result.error || 'Failed to generate report' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to generate report' });
-    } finally {
-      setGenerating(false);
-    }
-  };
 
   return (
     <div className="trip-statistics">
@@ -145,22 +107,6 @@ function TripStatistics({ trips, settings }) {
             <div className="stat-detail">{((scheduledTrips / totalTrips) * 100).toFixed(0)}%</div>
           </div>
         </div>
-      </div>
-
-      {message && (
-        <div className={`report-message ${message.type}`}>
-          {message.text}
-        </div>
-      )}
-
-      <div className="report-actions">
-        <button
-          className="btn btn-primary"
-          onClick={handleGenerateReport}
-          disabled={generating}
-        >
-          {generating ? 'Generating Report...' : '📄 Generate Travel Report'}
-        </button>
       </div>
     </div>
   );
