@@ -960,6 +960,14 @@ body {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
+.stat-card:focus {
+  outline: 3px solid #000000;
+  outline-offset: 2px;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
 .stat-value {
   font-size: 22px;
   font-weight: 800;
