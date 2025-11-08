@@ -32,6 +32,15 @@ function formatDate(dateStr) {
 async function generateTravelReport(trips, reportConfig, outputPath) {
   return new Promise(async (resolve, reject) => {
     try {
+      // Helper function to get display name for an address
+      const getDisplayName = (address) => {
+        if (!reportConfig.addressMappings || reportConfig.addressMappings.length === 0) {
+          return address;
+        }
+        const mapping = reportConfig.addressMappings.find(m => address.includes(m.address) || m.address.includes(address));
+        return mapping ? mapping.displayName : address;
+      };
+
       // Filter completed trips only
       const completedTrips = trips.filter(t => t.trip && t.trip.status === 'COMPLETED');
 
@@ -212,13 +221,16 @@ async function generateTravelReport(trips, reportConfig, outputPath) {
         // Parse date
         const dateStr = formatDate(activity.subtitle?.split(' • ')[0] || '');
 
-        // Get start and end locations
-        const startLocation = trip.waypoints && trip.waypoints.length > 0
+        // Get start and end locations (with mappings if available)
+        const startLocationRaw = trip.waypoints && trip.waypoints.length > 0
           ? trip.waypoints[0]
           : 'Unknown';
-        const endLocation = trip.waypoints && trip.waypoints.length > 1
+        const endLocationRaw = trip.waypoints && trip.waypoints.length > 1
           ? trip.waypoints[1]
           : 'Unknown';
+
+        const startLocation = getDisplayName(startLocationRaw);
+        const endLocation = getDisplayName(endLocationRaw);
 
         // Get fare
         const fareStr = trip.fare || '$0.00';

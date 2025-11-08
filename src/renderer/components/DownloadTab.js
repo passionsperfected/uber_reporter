@@ -140,7 +140,7 @@ function DownloadTab({ settings }) {
 
       const result = await window.electronAPI.generateReport(
         selectedTripsData,
-        settings.reportConfig,
+        { ...settings.reportConfig, addressMappings: settings.addressMappings },
         dirResult.path
       );
 

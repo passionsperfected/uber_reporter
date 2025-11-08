@@ -9,7 +9,15 @@ function TripItem({ tripData, isSelected, onSelect, addressMappings = [] }) {
 
   // Helper function to get display name for an address
   const getDisplayName = (address) => {
-    const mapping = addressMappings.find(m => m.address === address);
+    if (addressMappings.length === 0) {
+      return address;
+    }
+    // Try exact match first
+    let mapping = addressMappings.find(m => m.address === address);
+    // If no exact match, try partial match
+    if (!mapping) {
+      mapping = addressMappings.find(m => address.includes(m.address) || m.address.includes(address));
+    }
     return mapping ? mapping.displayName : address;
   };
 
