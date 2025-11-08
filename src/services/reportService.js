@@ -263,17 +263,17 @@ async function generateTravelReport(trips, reportConfig, outputPath) {
         rowIndex++;
       }
 
-      // Calculate fixed positions for total row and signatures at bottom of page
+      // Calculate fixed positions for signatures at bottom of page
       const pageHeight = 792;
       const bottomMargin = 50;
-      const totalRowHeight = 16;
+      const rowHeight = 16;
       const signatureSpacing = 40;
       const signatureLineHeight = 20;
 
-      // Position from bottom up: signature2, signature1, spacing, total row
+      // Position from bottom up: signature2, signature1, spacing, then total row
       const signature2Y = pageHeight - bottomMargin - signatureLineHeight;
       const signature1Y = signature2Y - signatureLineHeight;
-      const totalRowY = signature1Y - signatureSpacing - totalRowHeight;
+      const totalRowY = signature1Y - signatureSpacing - rowHeight;
 
       // Check if we need a new page for the total and signatures
       if (currentY > totalRowY - 20) { // 20px buffer
@@ -282,8 +282,7 @@ async function generateTravelReport(trips, reportConfig, outputPath) {
         currentY = 200 + 18; // Reset to just after header table
       }
 
-      // Fill empty rows from last trip to total row
-      const rowHeight = 16;
+      // Fill empty rows from last trip up to (but not including) total row
       doc.strokeColor('#808080');
       doc.lineWidth(0.5);
 
@@ -311,19 +310,19 @@ async function generateTravelReport(trips, reportConfig, outputPath) {
         currentY += rowHeight;
       }
 
-      // Draw total row at the fixed bottom position
+      // Draw total row as the next row in the continuous table
       doc.strokeColor('#808080');
       doc.lineWidth(0.5);
-      doc.rect(tableLeft, totalRowY, tableWidth, totalRowHeight).stroke();
+      doc.rect(tableLeft, currentY, tableWidth, rowHeight).stroke();
 
       // Draw separator between destination and amount columns in total row
-      doc.moveTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination, totalRowY)
-         .lineTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination, totalRowY + totalRowHeight)
+      doc.moveTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination, currentY)
+         .lineTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination, currentY + rowHeight)
          .stroke();
 
       // Draw separator between amount and note columns in total row
-      doc.moveTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination + colWidths.amount, totalRowY)
-         .lineTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination + colWidths.amount, totalRowY + totalRowHeight)
+      doc.moveTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination + colWidths.amount, currentY)
+         .lineTo(tableLeft + colWidths.date + colWidths.start + colWidths.destination + colWidths.amount, currentY + rowHeight)
          .stroke();
 
       // Get month and year from the last trip's date
@@ -337,21 +336,21 @@ async function generateTravelReport(trips, reportConfig, outputPath) {
       doc.fillColor('#000000');
 
       // Right-align the total text in the Destination column
-      doc.text(`TOTAL FARES FOR ${monthYear}`, tableLeft + colWidths.date + colWidths.start + 2, totalRowY + 3, {
+      doc.text(`TOTAL FARES FOR ${monthYear}`, tableLeft + colWidths.date + colWidths.start + 2, currentY + 3, {
         width: colWidths.destination - 4,
-        height: totalRowHeight,
+        height: rowHeight,
         align: 'right'
       });
-      doc.text(`$${totalAmount.toFixed(2)}`, tableLeft + colWidths.date + colWidths.start + colWidths.destination + 2, totalRowY + 3, { width: colWidths.amount - 4, height: totalRowHeight, align: 'right' });
+      doc.text(`$${totalAmount.toFixed(2)}`, tableLeft + colWidths.date + colWidths.start + colWidths.destination + 2, currentY + 3, { width: colWidths.amount - 4, height: rowHeight, align: 'right' });
 
       // Add signature lines at fixed bottom positions
       doc.font('Helvetica').fontSize(10);
 
       doc.text('Employee Signature: ___________________________________', tableLeft, signature1Y, { align: 'left' });
-      doc.text('Date: __________________', tableLeft + 380, signature1Y, { align: 'left' });
+      doc.text('Date: __________________', 370, signature1Y, { align: 'left' });
 
       doc.text('Supervisor Signature: __________________________________', tableLeft, signature2Y, { align: 'left' });
-      doc.text('Date: __________________', tableLeft + 380, signature2Y, { align: 'left' });
+      doc.text('Date: __________________', 370, signature2Y, { align: 'left' });
 
       // Finalize PDF
       doc.end();
