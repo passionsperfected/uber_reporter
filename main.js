@@ -8,6 +8,16 @@ const { fetchActivitiesByDate, fetchTripDetails, testConnection } = require('./s
 const { downloadPDF, mergePDFs } = require('./src/services/pdfService');
 const { getCachedActivities, cacheActivities, getCachedTrip, cacheTrip, getCacheStats, clearCache } = require('./src/services/cacheService');
 const { generateTravelReport } = require('./src/services/reportService');
+const {
+  saveAddressMappings: saveAddressMappingsInternal,
+  loadAddressMappings: loadAddressMappingsInternal,
+  saveReportConfig: saveReportConfigInternal,
+  loadReportConfig: loadReportConfigInternal,
+  exportAddressMappings,
+  importAddressMappings,
+  exportReportConfig,
+  importReportConfig
+} = require('./src/services/settingsService');
 
 let mainWindow;
 
@@ -270,9 +280,34 @@ ipcMain.handle('generate-report', async (event, { trips, reportConfig, outputDir
   }
 });
 
+// Auto-save address mappings (internal persistence)
 ipcMain.handle('save-address-mappings', async (event, mappings) => {
+  console.log('Auto-saving address mappings');
+  try {
+    await saveAddressMappingsInternal(mappings);
+    return { success: true };
+  } catch (error) {
+    console.error('Error auto-saving address mappings:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Auto-load address mappings (internal persistence)
+ipcMain.handle('load-address-mappings', async () => {
+  console.log('Auto-loading address mappings');
+  try {
+    const mappings = await loadAddressMappingsInternal();
+    return { success: true, mappings };
+  } catch (error) {
+    console.error('Error auto-loading address mappings:', error);
+    return { success: false, error: error.message, mappings: [] };
+  }
+});
+
+// Export address mappings (user-selected file)
+ipcMain.handle('export-address-mappings', async (event, mappings) => {
   const { dialog } = require('electron');
-  console.log('Saving address mappings');
+  console.log('Exporting address mappings to file');
 
   try {
     const result = await dialog.showSaveDialog(mainWindow, {
@@ -288,18 +323,18 @@ ipcMain.handle('save-address-mappings', async (event, mappings) => {
       return { success: false };
     }
 
-    await fs.writeFile(result.filePath, JSON.stringify(mappings, null, 2));
-    console.log(`Address mappings saved to ${result.filePath}`);
+    await exportAddressMappings(mappings, result.filePath);
     return { success: true, filePath: result.filePath };
   } catch (error) {
-    console.error('Error saving address mappings:', error);
+    console.error('Error exporting address mappings:', error);
     return { success: false, error: error.message };
   }
 });
 
-ipcMain.handle('load-address-mappings', async () => {
+// Import address mappings (user-selected file)
+ipcMain.handle('import-address-mappings', async () => {
   const { dialog } = require('electron');
-  console.log('Loading address mappings');
+  console.log('Importing address mappings from file');
 
   try {
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -315,19 +350,51 @@ ipcMain.handle('load-address-mappings', async () => {
       return { success: false };
     }
 
-    const data = await fs.readFile(result.filePaths[0], 'utf-8');
-    const mappings = JSON.parse(data);
-    console.log(`Loaded ${mappings.length} address mappings`);
+    const mappings = await importAddressMappings(result.filePaths[0]);
     return { success: true, mappings };
   } catch (error) {
-    console.error('Error loading address mappings:', error);
+    console.error('Error importing address mappings:', error);
     return { success: false, error: error.message };
   }
 });
 
+// Auto-save report config (internal persistence)
 ipcMain.handle('save-report-config', async (event, config) => {
+  console.log('Auto-saving report configuration');
+  try {
+    await saveReportConfigInternal(config);
+    return { success: true };
+  } catch (error) {
+    console.error('Error auto-saving report config:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Auto-load report config (internal persistence)
+ipcMain.handle('load-report-config', async () => {
+  console.log('Auto-loading report configuration');
+  try {
+    const config = await loadReportConfigInternal();
+    return { success: true, config };
+  } catch (error) {
+    console.error('Error auto-loading report config:', error);
+    return {
+      success: false,
+      error: error.message,
+      config: {
+        name: '',
+        vendorNumber: '',
+        purchaseOrder: '',
+        department: ''
+      }
+    };
+  }
+});
+
+// Export report config (user-selected file)
+ipcMain.handle('export-report-config', async (event, config) => {
   const { dialog } = require('electron');
-  console.log('Saving report configuration');
+  console.log('Exporting report configuration to file');
 
   try {
     const result = await dialog.showSaveDialog(mainWindow, {
@@ -343,18 +410,18 @@ ipcMain.handle('save-report-config', async (event, config) => {
       return { success: false };
     }
 
-    await fs.writeFile(result.filePath, JSON.stringify(config, null, 2));
-    console.log(`Report config saved to ${result.filePath}`);
+    await exportReportConfig(config, result.filePath);
     return { success: true, filePath: result.filePath };
   } catch (error) {
-    console.error('Error saving report config:', error);
+    console.error('Error exporting report config:', error);
     return { success: false, error: error.message };
   }
 });
 
-ipcMain.handle('load-report-config', async () => {
+// Import report config (user-selected file)
+ipcMain.handle('import-report-config', async () => {
   const { dialog } = require('electron');
-  console.log('Loading report configuration');
+  console.log('Importing report configuration from file');
 
   try {
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -370,12 +437,10 @@ ipcMain.handle('load-report-config', async () => {
       return { success: false };
     }
 
-    const data = await fs.readFile(result.filePaths[0], 'utf-8');
-    const config = JSON.parse(data);
-    console.log('Loaded report configuration');
+    const config = await importReportConfig(result.filePaths[0]);
     return { success: true, config };
   } catch (error) {
-    console.error('Error loading report config:', error);
+    console.error('Error importing report config:', error);
     return { success: false, error: error.message };
   }
 });

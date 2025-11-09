@@ -1,8 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function AddressMapping({ settings, setSettings }) {
   const [newAddress, setNewAddress] = useState('');
   const [newDisplayName, setNewDisplayName] = useState('');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Auto-save address mappings when they change (skip initial load)
+  useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
+
+    const saveTimeout = setTimeout(async () => {
+      try {
+        await window.electronAPI.saveAddressMappings(settings.addressMappings);
+        console.log('Address mappings auto-saved');
+      } catch (error) {
+        console.error('Error auto-saving address mappings:', error);
+      }
+    }, 500); // Debounce by 500ms
+
+    return () => clearTimeout(saveTimeout);
+  }, [settings.addressMappings]);
 
   const handleAddMapping = () => {
     if (!newAddress.trim() || !newDisplayName.trim()) {
@@ -44,7 +64,7 @@ function AddressMapping({ settings, setSettings }) {
 
   const handleExport = async () => {
     try {
-      const result = await window.electronAPI.saveAddressMappings(settings.addressMappings);
+      const result = await window.electronAPI.exportAddressMappings(settings.addressMappings);
       if (result.success) {
         alert(`Address mappings exported successfully to:\n${result.filePath}`);
       } else {
@@ -57,7 +77,7 @@ function AddressMapping({ settings, setSettings }) {
 
   const handleImport = async () => {
     try {
-      const result = await window.electronAPI.loadAddressMappings();
+      const result = await window.electronAPI.importAddressMappings();
       if (result.success) {
         setSettings({
           ...settings,

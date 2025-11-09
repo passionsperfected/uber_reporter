@@ -1,6 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 function ReportConfig({ settings, setSettings }) {
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Auto-save report config when it changes (skip initial load)
+  useEffect(() => {
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
+
+    const saveTimeout = setTimeout(async () => {
+      try {
+        await window.electronAPI.saveReportConfig(settings.reportConfig);
+        console.log('Report config auto-saved');
+      } catch (error) {
+        console.error('Error auto-saving report config:', error);
+      }
+    }, 500); // Debounce by 500ms
+
+    return () => clearTimeout(saveTimeout);
+  }, [settings.reportConfig]);
+
   const handleChange = (field, value) => {
     setSettings({
       ...settings,
@@ -13,7 +34,7 @@ function ReportConfig({ settings, setSettings }) {
 
   const handleExport = async () => {
     try {
-      const result = await window.electronAPI.saveReportConfig(settings.reportConfig);
+      const result = await window.electronAPI.exportReportConfig(settings.reportConfig);
       if (result.success) {
         alert(`Report configuration exported successfully to:\n${result.filePath}`);
       } else {
@@ -26,7 +47,7 @@ function ReportConfig({ settings, setSettings }) {
 
   const handleImport = async () => {
     try {
-      const result = await window.electronAPI.loadReportConfig();
+      const result = await window.electronAPI.importReportConfig();
       if (result.success) {
         setSettings({
           ...settings,

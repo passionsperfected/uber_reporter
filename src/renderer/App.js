@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DownloadTab from './components/DownloadTab';
 import SettingsTab from './components/SettingsTab';
 
@@ -18,6 +18,38 @@ function App() {
   const [logMessage, setLogMessage] = useState(null);
   const [showBugReport, setShowBugReport] = useState(false);
   const [bugDescription, setBugDescription] = useState('');
+
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      // Load address mappings
+      const addressResult = await window.electronAPI.loadAddressMappings();
+      const addressMappings = addressResult.success ? addressResult.mappings : [];
+
+      // Load report config
+      const reportResult = await window.electronAPI.loadReportConfig();
+      const reportConfig = reportResult.success ? reportResult.config : {
+        name: '',
+        vendorNumber: '',
+        purchaseOrder: '',
+        department: ''
+      };
+
+      setSettings(prev => ({
+        ...prev,
+        addressMappings,
+        reportConfig
+      }));
+
+      console.log('Settings loaded successfully');
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
 
   const handleBugButtonClick = () => {
     setShowBugReport(true);
