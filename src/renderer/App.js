@@ -161,8 +161,12 @@ function App() {
       </nav>
 
       <main className="tab-content" role="main" aria-label={activeView === 'download' ? 'Download and receipts section' : 'Settings section'}>
-        {activeView === 'download' && <DownloadTab settings={settings} />}
-        {activeView === 'settings' && <SettingsTab settings={settings} setSettings={setSettings} />}
+        <div style={{ display: activeView === 'download' ? 'block' : 'none' }}>
+          <DownloadTab settings={settings} />
+        </div>
+        <div style={{ display: activeView === 'settings' ? 'block' : 'none' }}>
+          <SettingsTab settings={settings} setSettings={setSettings} />
+        </div>
       </main>
     </div>
   );

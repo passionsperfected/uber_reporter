@@ -14,6 +14,8 @@ function DownloadTab({ settings }) {
   const [activeView, setActiveView] = useState('trips');
   const [generatingReport, setGeneratingReport] = useState(false);
   const [reportMessage, setReportMessage] = useState(null);
+  const [visibleStatuses, setVisibleStatuses] = useState(new Set(['COMPLETED']));
+  const [showMissingSettingsModal, setShowMissingSettingsModal] = useState(false);
 
   // Auto-dismiss notification after 5 seconds
   useEffect(() => {
@@ -51,15 +53,35 @@ function DownloadTab({ settings }) {
     }
   };
 
+  // Get unique statuses from trips
+  const uniqueStatuses = [...new Set(trips
+    .filter(t => t.trip && t.trip.status)
+    .map(t => t.trip.status)
+  )].sort();
+
+  // Filter trips by visible statuses
+  const visibleTrips = trips.filter(t =>
+    t.trip && t.trip.status && visibleStatuses.has(t.trip.status)
+  );
+
+  const handleToggleStatus = (status) => {
+    const newStatuses = new Set(visibleStatuses);
+    if (newStatuses.has(status)) {
+      newStatuses.delete(status);
+    } else {
+      newStatuses.add(status);
+    }
+    setVisibleStatuses(newStatuses);
+  };
+
   const handleSelectAll = () => {
-    const completedTripUUIDs = trips
-      .filter(t => t.trip && t.trip.status === 'COMPLETED')
+    const visibleTripUUIDs = visibleTrips
       .map(t => t.trip.jobUUID || t.activity.uuid);
 
-    if (selectedTrips.size === completedTripUUIDs.length) {
+    if (selectedTrips.size === visibleTripUUIDs.length && visibleTripUUIDs.length > 0) {
       setSelectedTrips(new Set());
     } else {
-      setSelectedTrips(new Set(completedTripUUIDs));
+      setSelectedTrips(new Set(visibleTripUUIDs));
     }
   };
 
@@ -117,7 +139,7 @@ function DownloadTab({ settings }) {
 
     // Check if report config is set
     if (!settings.reportConfig?.name || !settings.reportConfig?.vendorNumber) {
-      setError('Please configure your report settings first (Settings → Report)');
+      setShowMissingSettingsModal(true);
       return;
     }
 
@@ -157,8 +179,6 @@ function DownloadTab({ settings }) {
     }
   };
 
-  const completedTrips = trips.filter(t => t.trip && t.trip.status === 'COMPLETED');
-
   return (
     <div className="download-tab">
       {reportMessage && (
@@ -178,6 +198,42 @@ function DownloadTab({ settings }) {
             >
               ×
             </button>
+          </div>
+        </div>
+      )}
+
+      {showMissingSettingsModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowMissingSettingsModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="missing-settings-title"
+          aria-describedby="missing-settings-description"
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 id="missing-settings-title">Report Configuration Required</h2>
+            <p id="missing-settings-description" className="modal-description">
+              Before generating a report, you need to configure your report settings. This includes your name, vendor number, and other required information.
+            </p>
+            <div className="modal-instructions-box">
+              <strong>To configure your report settings:</strong>
+              <ol className="modal-instructions">
+                <li>Click the <strong>Settings</strong> tab at the top</li>
+                <li>Go to the <strong>Report</strong> section</li>
+                <li>Either fill in your information manually or click <strong>Import</strong> to load a saved configuration</li>
+                <li>Return to this page to generate your report</li>
+              </ol>
+            </div>
+            <div className="modal-actions" role="group" aria-label="Missing settings modal actions">
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowMissingSettingsModal(false)}
+                aria-label="Close modal"
+              >
+                Got It
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -252,16 +308,33 @@ function DownloadTab({ settings }) {
                 role="tabpanel"
                 aria-labelledby="trips-tab"
               >
+                {uniqueStatuses.length > 0 && (
+                  <div className="status-filters">
+                    <label className="status-filter-label">Show Status:</label>
+                    {uniqueStatuses.map(status => (
+                      <label key={status} className="status-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={visibleStatuses.has(status)}
+                          onChange={() => handleToggleStatus(status)}
+                          aria-label={`Show ${status} trips`}
+                        />
+                        <span>{status}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
                 <button
                   className="btn btn-secondary"
                   onClick={handleSelectAll}
-                  aria-label={selectedTrips.size === completedTrips.length ? `Deselect all ${completedTrips.length} trips` : `Select all ${completedTrips.length} trips`}
+                  aria-label={selectedTrips.size === visibleTrips.length ? `Deselect all ${visibleTrips.length} trips` : `Select all ${visibleTrips.length} trips`}
                 >
-                  {selectedTrips.size === completedTrips.length ? 'Deselect All' : 'Select All'}
+                  {selectedTrips.size === visibleTrips.length && visibleTrips.length > 0 ? 'Deselect All' : 'Select All'}
                 </button>
 
                 <span className="trip-count" role="status" aria-live="polite" aria-atomic="true">
-                  {selectedTrips.size} of {completedTrips.length} trips selected
+                  {selectedTrips.size} of {visibleTrips.length} trips selected
                 </span>
 
                 <button
@@ -286,7 +359,7 @@ function DownloadTab({ settings }) {
               </div>
 
               <TripList
-                trips={trips}
+                trips={visibleTrips}
                 selectedTrips={selectedTrips}
                 onTripSelect={handleTripSelect}
                 settings={settings}

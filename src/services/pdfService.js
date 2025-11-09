@@ -2,6 +2,7 @@ const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
 const { PDFDocument } = require('pdf-lib');
+const { PDF_CACHE_DIR } = require('./cacheService');
 
 /**
  * Download a single PDF receipt
@@ -12,25 +13,41 @@ const { PDFDocument } = require('pdf-lib');
  */
 async function downloadPDF(tripUUID, cookies, outputDir) {
   const url = `https://riders.uber.com/trips/${tripUUID}/receipt?contentType=PDF`;
+  const cachedPath = path.join(PDF_CACHE_DIR, `${tripUUID}.pdf`);
   const outputPath = path.join(outputDir, `${tripUUID}.pdf`);
 
   try {
-    // Ensure output directory exists
+    // Ensure both cache and output directories exist
+    await fs.mkdir(PDF_CACHE_DIR, { recursive: true });
     await fs.mkdir(outputDir, { recursive: true });
 
-    const cookieString = Object.entries(cookies)
-      .map(([name, value]) => `${name}=${value}`)
-      .join('; ');
+    // Check if PDF exists in cache
+    try {
+      await fs.access(cachedPath);
+      // PDF is cached, copy from cache to output directory
+      await fs.copyFile(cachedPath, outputPath);
+      return outputPath;
+    } catch (cacheError) {
+      // PDF not cached, download it
+      const cookieString = Object.entries(cookies)
+        .map(([name, value]) => `${name}=${value}`)
+        .join('; ');
 
-    const response = await axios.get(url, {
-      headers: {
-        'Cookie': cookieString
-      },
-      responseType: 'arraybuffer'
-    });
+      const response = await axios.get(url, {
+        headers: {
+          'Cookie': cookieString
+        },
+        responseType: 'arraybuffer'
+      });
 
-    await fs.writeFile(outputPath, response.data);
-    return outputPath;
+      // Save to cache first
+      await fs.writeFile(cachedPath, response.data);
+
+      // Then copy from cache to output directory
+      await fs.copyFile(cachedPath, outputPath);
+
+      return outputPath;
+    }
   } catch (error) {
     throw new Error(`Failed to download PDF for ${tripUUID}: ${error.message}`);
   }

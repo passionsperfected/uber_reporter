@@ -56,9 +56,14 @@ function TripItem({ tripData, isSelected, onSelect, addressMappings = [] }) {
           <span className="trip-date" aria-hidden="true">
             {date} {time && `at ${time}`}
           </span>
-          <span className="trip-fare" aria-hidden="true">
-            {fare}
-          </span>
+          <div className="trip-header-right" aria-hidden="true">
+            <span className={`trip-status-badge status-${trip.status?.toLowerCase()}`}>
+              {trip.status}
+            </span>
+            <span className="trip-fare">
+              {fare}
+            </span>
+          </div>
         </div>
 
         <div className="trip-route">

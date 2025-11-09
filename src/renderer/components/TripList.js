@@ -2,13 +2,10 @@ import React from 'react';
 import TripItem from './TripItem';
 
 function TripList({ trips, selectedTrips, onTripSelect, settings }) {
-  // Filter to only show completed trips
-  const completedTrips = trips.filter(t => t.trip && t.trip.status === 'COMPLETED');
-
-  if (completedTrips.length === 0) {
+  if (trips.length === 0) {
     return (
       <div className="no-trips" role="status" aria-live="polite">
-        <p>No completed trips found for the selected date range.</p>
+        <p>No trips found for the selected date range and status filters.</p>
       </div>
     );
   }
@@ -17,9 +14,9 @@ function TripList({ trips, selectedTrips, onTripSelect, settings }) {
     <div
       className="trip-list"
       role="group"
-      aria-label={`${completedTrips.length} completed trip${completedTrips.length !== 1 ? 's' : ''}`}
+      aria-label={`${trips.length} trip${trips.length !== 1 ? 's' : ''}`}
     >
-      {completedTrips.map((tripData) => {
+      {trips.map((tripData) => {
         const uuid = tripData.trip.jobUUID || tripData.activity.uuid;
         return (
           <TripItem
