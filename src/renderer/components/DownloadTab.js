@@ -37,7 +37,7 @@ function DownloadTab({ settings }) {
     setSelectedTrips(new Set());
 
     try {
-      const result = await window.electronAPI.fetchTrips(startDate, endDate, settings.browserType);
+      const result = await window.electronAPI.fetchTrips(startDate, endDate, 'firefox');
 
       if (result.success) {
         setTrips(result.trips);
@@ -93,7 +93,7 @@ function DownloadTab({ settings }) {
 
       const result = await window.electronAPI.downloadReceipts(
         Array.from(selectedTrips),
-        settings.browserType,
+        'firefox',
         dirResult.path
       );
 
