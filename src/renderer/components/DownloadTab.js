@@ -369,7 +369,10 @@ function DownloadTab({ settings }) {
 
           {activeView === 'metrics' && (
             <div id="metrics-panel" role="tabpanel" aria-labelledby="metrics-tab">
-              <TripStatistics trips={trips} />
+              <TripStatistics trips={trips.filter(t => {
+                const uuid = t.trip?.jobUUID || t.activity?.uuid;
+                return selectedTrips.has(uuid);
+              })} />
             </div>
           )}
         </>

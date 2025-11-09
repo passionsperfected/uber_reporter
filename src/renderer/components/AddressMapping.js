@@ -5,6 +5,21 @@ function AddressMapping({ settings, setSettings }) {
   const [newDisplayName, setNewDisplayName] = useState('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+  // Ensure all mappings have unique IDs
+  useEffect(() => {
+    const mappingsNeedIds = settings.addressMappings.some(m => !m.id);
+    if (mappingsNeedIds) {
+      const mappingsWithIds = settings.addressMappings.map((m, index) => ({
+        ...m,
+        id: m.id || Date.now() + index
+      }));
+      setSettings({
+        ...settings,
+        addressMappings: mappingsWithIds
+      });
+    }
+  }, []);
+
   // Auto-save address mappings when they change (skip initial load)
   useEffect(() => {
     if (isInitialLoad) {
