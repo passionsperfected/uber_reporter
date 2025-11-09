@@ -11,12 +11,54 @@ function ReportConfig({ settings, setSettings }) {
     });
   };
 
+  const handleExport = async () => {
+    try {
+      const result = await window.electronAPI.saveReportConfig(settings.reportConfig);
+      if (result.success) {
+        alert(`Report configuration exported successfully to:\n${result.filePath}`);
+      } else {
+        alert(`Failed to export: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`Error exporting config: ${error.message}`);
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const result = await window.electronAPI.loadReportConfig();
+      if (result.success) {
+        setSettings({
+          ...settings,
+          reportConfig: result.config
+        });
+        alert('Report configuration imported successfully');
+      } else if (result.error) {
+        alert(`Failed to import: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`Error importing config: ${error.message}`);
+    }
+  };
+
   return (
     <div className="report-config">
-      <h2 id="report-config-heading">Report Configuration</h2>
-      <p className="settings-description">
-        Configure the information that will appear on your travel reports. These values will be used when generating PDF reports from your trip data.
-      </p>
+      <div className="settings-header">
+        <div>
+          <h2 id="report-config-heading">Report Configuration</h2>
+          <p className="settings-description">
+            Configure the information that will appear on your travel reports. These values will be used when generating PDF reports from your trip data.
+          </p>
+        </div>
+        <div className="settings-actions">
+          <button className="btn btn-secondary" onClick={handleImport} aria-label="Import report configuration from file">
+            📥 Import
+          </button>
+          <button className="btn btn-secondary" onClick={handleExport} aria-label="Export report configuration to file">
+            📤 Export
+          </button>
+        </div>
+      </div>
 
       <div className="settings-section">
         <label htmlFor="report-name" className="settings-label">Name</label>

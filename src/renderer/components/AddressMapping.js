@@ -42,13 +42,55 @@ function AddressMapping({ settings, setSettings }) {
     });
   };
 
+  const handleExport = async () => {
+    try {
+      const result = await window.electronAPI.saveAddressMappings(settings.addressMappings);
+      if (result.success) {
+        alert(`Address mappings exported successfully to:\n${result.filePath}`);
+      } else {
+        alert(`Failed to export: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`Error exporting mappings: ${error.message}`);
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const result = await window.electronAPI.loadAddressMappings();
+      if (result.success) {
+        setSettings({
+          ...settings,
+          addressMappings: result.mappings
+        });
+        alert(`Successfully imported ${result.mappings.length} address mappings`);
+      } else if (result.error) {
+        alert(`Failed to import: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`Error importing mappings: ${error.message}`);
+    }
+  };
+
   return (
     <div className="address-mapping">
-      <h2>Address Mapping</h2>
-      <p className="settings-description">
-        Map long addresses to friendly display names (e.g., "123 Main St" → "Home").
-        These will be shown instead of full addresses in your trip list.
-      </p>
+      <div className="settings-header">
+        <div>
+          <h2>Address Mapping</h2>
+          <p className="settings-description">
+            Map long addresses to friendly display names (e.g., "123 Main St" → "Home").
+            These will be shown instead of full addresses in your trip list.
+          </p>
+        </div>
+        <div className="settings-actions">
+          <button className="btn btn-secondary" onClick={handleImport} aria-label="Import address mappings from file">
+            📥 Import
+          </button>
+          <button className="btn btn-secondary" onClick={handleExport} aria-label="Export address mappings to file">
+            📤 Export
+          </button>
+        </div>
+      </div>
 
       <div className="settings-section">
         <label className="settings-label">Add New Mapping</label>

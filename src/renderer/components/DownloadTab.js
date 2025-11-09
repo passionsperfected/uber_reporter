@@ -52,13 +52,14 @@ function DownloadTab({ settings }) {
   };
 
   const handleSelectAll = () => {
-    if (selectedTrips.size === trips.length) {
+    const completedTripUUIDs = trips
+      .filter(t => t.trip && t.trip.status === 'COMPLETED')
+      .map(t => t.trip.jobUUID || t.activity.uuid);
+
+    if (selectedTrips.size === completedTripUUIDs.length) {
       setSelectedTrips(new Set());
     } else {
-      const allTripUUIDs = trips
-        .filter(t => t.trip && t.trip.status === 'COMPLETED')
-        .map(t => t.trip.jobUUID || t.activity.uuid);
-      setSelectedTrips(new Set(allTripUUIDs));
+      setSelectedTrips(new Set(completedTripUUIDs));
     }
   };
 

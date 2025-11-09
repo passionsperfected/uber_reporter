@@ -270,6 +270,116 @@ ipcMain.handle('generate-report', async (event, { trips, reportConfig, outputDir
   }
 });
 
+ipcMain.handle('save-address-mappings', async (event, mappings) => {
+  const { dialog } = require('electron');
+  console.log('Saving address mappings');
+
+  try {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export Address Mappings',
+      defaultPath: 'address-mappings.json',
+      filters: [
+        { name: 'JSON Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+
+    if (result.canceled) {
+      return { success: false };
+    }
+
+    await fs.writeFile(result.filePath, JSON.stringify(mappings, null, 2));
+    console.log(`Address mappings saved to ${result.filePath}`);
+    return { success: true, filePath: result.filePath };
+  } catch (error) {
+    console.error('Error saving address mappings:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('load-address-mappings', async () => {
+  const { dialog } = require('electron');
+  console.log('Loading address mappings');
+
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Import Address Mappings',
+      filters: [
+        { name: 'JSON Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false };
+    }
+
+    const data = await fs.readFile(result.filePaths[0], 'utf-8');
+    const mappings = JSON.parse(data);
+    console.log(`Loaded ${mappings.length} address mappings`);
+    return { success: true, mappings };
+  } catch (error) {
+    console.error('Error loading address mappings:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('save-report-config', async (event, config) => {
+  const { dialog } = require('electron');
+  console.log('Saving report configuration');
+
+  try {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export Report Configuration',
+      defaultPath: 'report-config.json',
+      filters: [
+        { name: 'JSON Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+
+    if (result.canceled) {
+      return { success: false };
+    }
+
+    await fs.writeFile(result.filePath, JSON.stringify(config, null, 2));
+    console.log(`Report config saved to ${result.filePath}`);
+    return { success: true, filePath: result.filePath };
+  } catch (error) {
+    console.error('Error saving report config:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('load-report-config', async () => {
+  const { dialog } = require('electron');
+  console.log('Loading report configuration');
+
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Import Report Configuration',
+      filters: [
+        { name: 'JSON Files', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false };
+    }
+
+    const data = await fs.readFile(result.filePaths[0], 'utf-8');
+    const config = JSON.parse(data);
+    console.log('Loaded report configuration');
+    return { success: true, config };
+  } catch (error) {
+    console.error('Error loading report config:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('export-logs', async (event, outputDir, bugDescription) => {
   console.log(`Exporting logs to ${outputDir}`);
   console.log(`Current log buffer contains ${logBuffer.length} entries`);

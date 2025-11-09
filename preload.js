@@ -12,5 +12,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   clearCache: () => ipcRenderer.invoke('clear-cache'),
   generateReport: (trips, reportConfig, outputDir) =>
     ipcRenderer.invoke('generate-report', { trips, reportConfig, outputDir }),
-  exportLogs: (outputDir, bugDescription) => ipcRenderer.invoke('export-logs', outputDir, bugDescription)
+  exportLogs: (outputDir, bugDescription) => ipcRenderer.invoke('export-logs', outputDir, bugDescription),
+  saveAddressMappings: (mappings) => ipcRenderer.invoke('save-address-mappings', mappings),
+  loadAddressMappings: () => ipcRenderer.invoke('load-address-mappings'),
+  saveReportConfig: (config) => ipcRenderer.invoke('save-report-config', config),
+  loadReportConfig: () => ipcRenderer.invoke('load-report-config')
 });
