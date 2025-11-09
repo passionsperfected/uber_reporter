@@ -32,11 +32,11 @@ body {
 }
 
 .title-bar {
-  background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%);
+  background: linear-gradient(135deg, #1a3a5f 0%, #2d5580 50%, #4a8ec8 100%);
   color: white;
   padding: 24px 40px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 20px rgba(26, 58, 95, 0.3);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -136,15 +136,15 @@ body {
 }
 
 .nav-btn:focus {
-  outline: 3px solid #000000;
+  outline: 3px solid #1a3a5f;
   outline-offset: 2px;
 }
 
 .nav-btn.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #000000 0%, #2d2d2d 100%);
-  border-color: #000000;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #1a3a5f 0%, #4a8ec8 100%);
+  border-color: #1a3a5f;
+  box-shadow: 0 6px 20px rgba(26, 58, 95, 0.35);
 }
 
 .tab-content {
@@ -292,7 +292,7 @@ body {
 }
 
 .btn:focus {
-  outline: 3px solid #000000;
+  outline: 3px solid #1a3a5f;
   outline-offset: 3px;
 }
 
@@ -303,7 +303,7 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #000000 0%, #2d2d2d 100%);
+  background: linear-gradient(135deg, #1a3a5f 0%, #4a8ec8 100%);
   color: white;
   position: relative;
   overflow: hidden;
@@ -325,8 +325,8 @@ body {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1a1a1a 0%, #404040 100%);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #2d5580 0%, #5ca3d8 100%);
+  box-shadow: 0 6px 20px rgba(74, 142, 200, 0.4);
   transform: translateY(-2px);
 }
 
@@ -350,14 +350,14 @@ body {
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #00c853 0%, #00a843 100%);
+  background: linear-gradient(135deg, #1a8ec8 0%, #2eb8b8 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+  box-shadow: 0 4px 12px rgba(26, 142, 200, 0.3);
 }
 
 .btn-success:hover:not(:disabled) {
-  background: linear-gradient(135deg, #00e061 0%, #00c853 100%);
-  box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
+  background: linear-gradient(135deg, #2eb8b8 0%, #4dd0d0 100%);
+  box-shadow: 0 6px 20px rgba(46, 184, 184, 0.4);
   transform: translateY(-2px);
 }
 
@@ -404,14 +404,14 @@ body {
 }
 
 .toolbar-btn:focus {
-  outline: 3px solid #000000;
+  outline: 3px solid #1a3a5f;
   outline-offset: 2px;
 }
 
 .toolbar-btn.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #000000 0%, #2d2d2d 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #1a3a5f 0%, #4a8ec8 100%);
+  box-shadow: 0 4px 12px rgba(26, 58, 95, 0.3);
 }
 
 .trip-controls {
@@ -594,9 +594,9 @@ body {
 }
 
 .trip-status-badge.status-completed {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  color: #155724;
-  border: 1px solid #28a745;
+  background: linear-gradient(135deg, #d4e8f7 0%, #c3dff0 100%);
+  color: #1a3a5f;
+  border: 1px solid #4a8ec8;
 }
 
 .trip-status-badge.status-canceled {
@@ -614,7 +614,7 @@ body {
 .trip-fare {
   font-size: 20px;
   font-weight: 800;
-  background: linear-gradient(135deg, #000000 0%, #333333 100%);
+  background: linear-gradient(135deg, #1a3a5f 0%, #4a8ec8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
